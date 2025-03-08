@@ -57,23 +57,45 @@ def get_icon_filename(filename,size):
         icon = info.get_icon().get_names()[0]
         final_filename = try_lookup_icon(icon, size, 0, 'application-x-executable')
     return final_filename
-        
+
+def get_parent_path(filepath):
+    if os.path.isdir(filepath):
+        return filepath
+    else:
+        return os.path.dirname(filepath)
+
 def FileActionResults(extension, file):
     logger.info('Actions for file %s' % file)
-    return [
+    items = [
             ExtensionResultItem(
                 icon=document_open_icon,
-                name='Open file',
+                name='Open File',
                 on_enter=OpenAction(file)
             ),
             ExtensionResultItem(
+                icon=folder_important_icon,
+                name='Open Parent Folder',
+                on_enter=OpenAction(get_parent_path(file))
+            ),
+        ]
+    if os.path.isdir(file):
+        items = [
+                ExtensionResultItem(
+                    icon=folder_important_icon,
+                    name='Open \''+os.path.basename(file)+'\'',
+                    on_enter=OpenAction(file)
+                ),
+            ]
+
+    return items + [
+            ExtensionResultItem(
                 icon=document_duplicate_icon,
-                name='Copy path',
+                name='Copy Path',
                 on_enter=CopyToClipboardAction(file)
             ),
             ExtensionResultItem(
                 icon=terminal_icon,
-                name='Open terminal here',
+                name='Open terminal in folder',
                 on_enter=extension.get_open_in_terminal_script(file)
             )
         ]
